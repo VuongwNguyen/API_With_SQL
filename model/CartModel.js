@@ -21,6 +21,8 @@ const Cart = sequelize.define('cart', {
 }, {
     timestamps: true,
     tableName: 'carts'
+
+    
 });
 Customer.hasOne(Cart);
 Cart.belongsTo(Customer);
