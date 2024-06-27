@@ -1,34 +1,40 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, Model } = require("sequelize");
+const { sequelize } = require("../conf/Connection");
 
-const { sequelize } = require('../conf/Connection');
 
-const Category = sequelize.define('category', {
-    id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
+class Category extends Model { }
+
+Category.init({
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
+        avatarURL: {
+            type: DataTypes.STRING,
+            defaultValue: null,
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.STRING,
+        },
+        status: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+        },
     },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    description: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    image: {
-        type: DataTypes.STRING,
-        defaultValue: null
-    },
-    status: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true
+    {
+        sequelize,
+        modelName: "category",
+        timestamps: true,
+        tableName: "categories",
+        paranoid: true,
     }
-}, {
-    tableName: 'categories',
-    timestamps: true
-});
+);
+
 
 
 module.exports = Category;

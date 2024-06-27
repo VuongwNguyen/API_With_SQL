@@ -1,50 +1,48 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../conf/Connection');
+const { DataTypes, Model } = require("sequelize");
+const { sequelize } = require("../conf/Connection");
 
-const Category = require('./CategoryModel');
+class Product extends Model { }
 
-
-const Product = sequelize.define('product', {
+Product.init({
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
-    },
-    image: {
-        type: DataTypes.STRING,
-        allowNull: false
+        primaryKey: true,
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+    },
+    avatarURL: {
+        type: DataTypes.STRING,
+        defaultValue: null,
     },
     price: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    quantity: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+        type: DataTypes.DECIMAL,
+        allowNull: false,
     },
     description: {
         type: DataTypes.STRING,
-        allowNull: false
     },
     status: {
         type: DataTypes.BOOLEAN,
+        defaultValue: true,
+    },
+    categoryID: {
+        type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: true
+        references: {
+            model: "categories",
+            key: "id",
+        }
     },
 }, {
-    tableName: 'products',
-    timestamps: true
+    sequelize,
+    modelName: "product",
+    timestamps: true,
+    tableName: "products",
+    paranoid: true,
 });
-
-
-
-
-Product.belongsTo(Category, { foreignKey: 'categoryId' });
-Category.hasMany(Product);
 
 
 
