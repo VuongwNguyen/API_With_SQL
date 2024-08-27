@@ -37,50 +37,79 @@ const DATABASE_SERVER = process.env.DATABASE_SERVER || "localhost";
     port = 3306;
  */
 
-const sequelize = new Sequelize(
-    DATABASE_NAME,
-    DATABASE_USERNAME,
-    DATABASE_PASSWORD,
-    {
-        host: DATABASE_SERVER,
-        dialect: "mysql",
-        logging: false,
-    }
-);
+// const sequelize = new Sequelize(
+//   DATABASE_NAME,
+//   DATABASE_USERNAME,
+//   DATABASE_PASSWORD,
+//   {
+//     host: DATABASE_SERVER,
+//     dialect: "mysql",
+//     logging: false,
+//   }
+// );
 
-async function start() {
-    try {
-        const defaultSequelize = new Sequelize(
-            "sys",
-            DATABASE_USERNAME,
-            DATABASE_PASSWORD,
-            {
-                // logging: false,
-                dialect: "mysql",
-            }
-        );
-        await defaultSequelize
-            .query(`CREATE DATABASE ${DATABASE_NAME};`)
-            .then(() => console.log(`Database ${DATABASE_NAME} created successfully`))
-            .catch((error) => {
-                if (
-                    error.name === "SequelizeDatabaseError" &&
-                    error.parent &&
-                    error.parent.code === "ER_DB_CREATE_EXISTS"
-                ) {
-                    console.log(`Database ${DATABASE_NAME} already exists.`);
-                } else {
-                    console.error("Unable to create the database:", error);
-                }
-            });
-        await defaultSequelize.close();
-        await sequelize.sync({ alter: true });
-        console.log("All models were synchronized successfully.");
-        await sequelize.authenticate();
-        console.log("Connection has been established successfully.");
-    } catch (error) {
-        console.error("Unable to synchronize the models:", error);
+class Connection {
+  constructor() {
+    if (!Connection._instance) {
+      this._instance = new Sequelize(
+        DATABASE_NAME,
+        DATABASE_USERNAME,
+        DATABASE_PASSWORD,
+        {
+          host: DATABASE_SERVER,
+          dialect: "mysql",
+          logging: false,
+        }
+      );
+      Connection._instance = this;
     }
+    return Connection._instance;
+  }
+
+  getInstance() {
+    return this._instance;
+  }
+
+  async start() {
+    try {
+      const defaultSequelize = new Sequelize(
+        "sys",
+        DATABASE_USERNAME,
+        DATABASE_PASSWORD,
+        {
+          // logging: false,
+          dialect: "mysql",
+        }
+      );
+
+      await defaultSequelize
+        .query(`CREATE DATABASE IF NOT EXISTS ${DATABASE_NAME};`)
+        .then(() =>
+          console.log(`Database ${DATABASE_NAME} created successfully`)
+        )
+        .catch((error) => {
+          if (
+            error.name === "SequelizeDatabaseError" &&
+            error.parent &&
+            error.parent.code === "ER_DB_CREATE_EXISTS"
+          ) {
+            console.log(`Database ${DATABASE_NAME} already exists.`);
+          } else {
+            console.error("Unable to create the database:", error);
+          }
+        });
+      await defaultSequelize.close();
+      await this._instance.sync({ alter: true });
+      console.log("All models were synchronized successfully.");
+      await this._instance.authenticate();
+      console.log("Connection has been established successfully.");
+    } catch (error) {
+      console.error("Unable to synchronize the models:", error);
+    }
+  }
 }
 
-module.exports = { sequelize, start };
+const connection = new Connection();
+Object.freeze(connection);
+
+module.exports = connection;

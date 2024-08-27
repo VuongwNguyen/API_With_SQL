@@ -7,7 +7,7 @@ var cors = require("cors");
 var helmet = require("helmet");
 var app = express();
 
-var { start } = require("./conf/Connection");
+const DB = require("./conf/Connection");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -18,12 +18,13 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Start connection to database
+async function start() {
+  await DB.start();
+}
 start();
 
-const { CategoryModel, ProductModel } = require("./model/Relationship");
-
 // Routes
-app.use('/api', require('./routes/index'))
+app.use("/api", require("./routes/index"));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -37,9 +38,9 @@ app.use(function (err, req, res, next) {
 
   res.status(err.code || 500).json({
     message: err.message,
-    status: err.status
+    status: err.status,
   });
-  console.log(err.stack)
+  console.log(err.stack);
 });
 
 module.exports = app;

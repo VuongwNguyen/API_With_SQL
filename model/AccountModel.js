@@ -1,6 +1,7 @@
 const { DataTypes, Model } = require("sequelize");
-const { sequelize } = require("../conf/Connection");
+const Database = require("../conf/Connection");
 
+const sequelize = Database.getInstance();
 class Account extends Model {
   getFullname() {
     return `${this.firstname} ${this.lastname}`;
